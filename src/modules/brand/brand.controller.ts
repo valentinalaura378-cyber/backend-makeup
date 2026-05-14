@@ -1,64 +1,88 @@
-import { Request, Response } from "express";
-import * as service from "./brand.service";
+import {
+  Request,
+  Response,
+  NextFunction,
+} from "express";
 
-//Obtener todos
-export const getAllBrands = async (_req: Request, res: Response) => {
-  try {
-    const data = await service.getAllBrands();
-    res.json(data);
-  } catch (error: any) {
-    res.status(500).json({ message: error.message });
-  }
-};
+import { BrandService } from "./brand.service";
 
-//Obtener uno
-export const getBrandById = async (
-  req: Request<{ id: string }>,
-  res: Response
-) => {
-  try {
-    const { id } = req.params;
-    const data = await service.getBrandById(id);
-    res.json(data);
-  } catch (error: any) {
-    res.status(404).json({ message: error.message });
-  }
-};
+export class BrandController {
+  private service = new BrandService();
 
-//Crear
-export const createBrand = async (req: Request, res: Response) => {
-  try {
-    const result = await service.createBrand(req.body);
-    res.status(201).json(result);
-  } catch (error: any) {
-    res.status(400).json({ message: error.message });
-  }
-};
+  create = async (
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ) => {
+    try {
+      const data = await this.service.create(req.body);
 
-//Actualizar
-export const updateBrand = async (
-  req: Request<{ id: string }>,
-  res: Response
-) => {
-  try {
-    const { id } = req.params;
-    const result = await service.updateBrand(id, req.body);
-    res.json({ message: "Actualizado correctamente", result });
-  } catch (error: any) {
-    res.status(400).json({ message: error.message });
-  }
-};
+      res.status(201).json(data);
+    } catch (error: any) {
+      next(error);
+    }
+  };
 
-//Eliminar
-export const deleteBrand = async (
-  req: Request<{ id: string }>,
-  res: Response
-) => {
-  try {
-    const { id } = req.params;
-    await service.deleteBrand(id);
-    res.json({ message: "Eliminado correctamente" });
-  } catch (error: any) {
-    res.status(400).json({ message: error.message });
-  }
-};
+  findAll = async (
+    _req: Request,
+    res: Response,
+    next: NextFunction
+  ) => {
+    try {
+      const data = await this.service.findAll();
+
+      res.status(200).json(data);
+    } catch (error: any) {
+      next(error);
+    }
+  };
+
+  findById = async (
+    req: Request<{ id: string }>,
+    res: Response,
+    next: NextFunction
+  ) => {
+    try {
+      const data = await this.service.findById(
+        req.params.id
+      );
+
+      res.status(200).json(data);
+    } catch (error: any) {
+      next(error);
+    }
+  };
+
+  update = async (
+    req: Request<{ id: string }>,
+    res: Response,
+    next: NextFunction
+  ) => {
+    try {
+      const data = await this.service.update(
+        req.params.id,
+        req.body
+      );
+
+      res.status(200).json(data);
+    } catch (error: any) {
+      next(error);
+    }
+  };
+
+  delete = async (
+    req: Request<{ id: string }>,
+    res: Response,
+    next: NextFunction
+  ) => {
+    try {
+      const data = await this.service.delete(
+        req.params.id
+      );
+
+      res.status(200).json(data);
+    } catch (error: any) {
+      next(error);
+    }
+  };
+}

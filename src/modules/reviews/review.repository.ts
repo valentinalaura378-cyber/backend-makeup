@@ -2,34 +2,62 @@ import { ObjectId } from "mongodb";
 import { getDb } from "../../config/database";
 import { Review } from "./review.model";
 
-const collection = () => getDb().collection<Review>("reviews");
+export class ReviewRepository {
+  private collection() {
+    return getDb().collection<Review>("reviews");
+  }
 
-//Obtener todos
-export const findAll = async () => {
-  return await collection().find().toArray();
-};
+  // Crear
+  async create(data: Review): Promise<Review> {
+    const result = await this.collection().insertOne(data);
 
-//Obtener por ID
-export const findById = async (id: string) => {
-  return await collection().findOne({ _id: new ObjectId(id) });
-};
+    return {
+      _id: result.insertedId,
+      ...data,
+    };
+  }
 
-//Crear
-export const create = async (data: Review) => {
-  data.createdAt = new Date();
-  const result = await collection().insertOne(data);
-  return { _id: result.insertedId, ...data };
-};
+  // Obtener todas
+  async findAll(): Promise<Review[]> {
+    return this.collection()
+      .find({ isActive: true })
+      .toArray();
+  }
 
-//Actualizar
-export const update = async (id: string, data: Partial<Review>) => {
-  return await collection().updateOne(
-    { _id: new ObjectId(id) },
-    { $set: data }
-  );
-};
+  // Obtener por ID
+  async findById(id: string): Promise<Review | null> {
+    return this.collection().findOne({
+      _id: new ObjectId(id),
+      isActive: true,
+    });
+  }
 
-//Eliminar
-export const remove = async (id: string) => {
-  return await collection().deleteOne({ _id: new ObjectId(id) });
-};
+  // Actualizar
+  async update(
+    id: string,
+    data: Partial<Review>
+  ) {
+    return this.collection().updateOne(
+      { _id: new ObjectId(id) },
+      {
+        $set: {
+          ...data,
+          updatedAt: new Date(),
+        },
+      }
+    );
+  }
+
+  // Eliminar
+  async delete(id: string) {
+    return this.collection().updateOne(
+      { _id: new ObjectId(id) },
+      {
+        $set: {
+          isActive: false,
+          updatedAt: new Date(),
+        },
+      }
+    );
+  }
+}

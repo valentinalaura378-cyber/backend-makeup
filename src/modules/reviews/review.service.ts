@@ -1,67 +1,43 @@
-import * as repo from "./review.repository";
+import { ReviewRepository } from "./review.repository";
 import { Review } from "./review.model";
 
-// Obtener todos
-export const getAllReviews = async () => {
-  return await repo.findAll();
-};
+export class ReviewService {
+  private repository = new ReviewRepository();
 
-// Obtener uno
-export const getReviewById = async (id: string) => {
-  const data = await repo.findById(id);
+  async create(data: Review) {
+    const now = new Date();
 
-  if (!data) {
-    throw new Error("Review no encontrado");
+    const review = {
+      ...data,
+      isActive: true,
+      createdAt: now,
+      updatedAt: now,
+    };
+
+    return await this.repository.create(review);
   }
 
-  return data;
-};
-
-// Crear review
-export const createReview = async (data: any) => {
-  console.log("REVIEW DATA:", data);
-
-  const productId = data?.productId;
-  const rating = Number(data?.rating);
-  const comment = data?.comment;
-
-  if (!productId || !comment || isNaN(rating)) {
-    throw new Error("Campos obligatorios faltantes");
+  async findAll() {
+    return await this.repository.findAll();
   }
 
-  if (rating < 1 || rating > 5) {
-    throw new Error("El rating debe estar entre 1 y 5");
+  async findById(id: string) {
+    const review = await this.repository.findById(id);
+
+    if (!review)
+      throw new Error("Review no encontrada");
+
+    return review;
   }
 
-  return await repo.create({
-    productId,
-    rating,
-    comment,
-    createdAt: new Date()
-  });
-};
-
-// Actualizar review
-export const updateReview = async (id: string, data: Partial<Review>) => {
-  const existing = await repo.findById(id);
-
-  if (!existing) {
-    throw new Error("Review no encontrado");
+  async update(
+    id: string,
+    data: Partial<Review>
+  ) {
+    return await this.repository.update(id, data);
   }
 
-  return await repo.update(id, {
-    ...data,
-    updatedAt: new Date()
-  });
-};
-
-// Eliminar review
-export const deleteReview = async (id: string) => {
-  const existing = await repo.findById(id);
-
-  if (!existing) {
-    throw new Error("Review no encontrado");
+  async delete(id: string) {
+    return await this.repository.delete(id);
   }
-
-  await repo.remove(id);
-};
+}

@@ -1,57 +1,90 @@
-import { Request, Response } from "express";
-import * as service from "./category.service";
+import {
+  Request,
+  Response,
+  NextFunction,
+} from "express";
 
-//Obtener todos
-export const getAllCategories = async (_req: Request, res: Response) => {
-  try {
-    res.json(await service.getAllCategories());
-  } catch (e: any) {
-    res.status(500).json({ message: e.message });
-  }
-};
+import { CategoryService } from "./category.service";
 
-//Obtener uno
-export const getCategoryById = async (
-  req: Request<{ id: string }>,
-  res: Response
-) => {
-  try {
-    res.json(await service.getCategoryById(req.params.id));
-  } catch (e: any) {
-    res.status(404).json({ message: e.message });
-  }
-};
+export class CategoryController {
+  private service = new CategoryService();
 
-//Crear
-export const createCategory = async (req: Request, res: Response) => {
-  try {
-    res.status(201).json(await service.createCategory(req.body));
-  } catch (e: any) {
-    res.status(400).json({ message: e.message });
-  }
-};
+  create = async (
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ) => {
+    try {
+      const data = await this.service.create(req.body);
 
-//Actualizar
-export const updateCategory = async (
-  req: Request<{ id: string }>,
-  res: Response
-) => {
-  try {
-    res.json(await service.updateCategory(req.params.id, req.body));
-  } catch (e: any) {
-    res.status(400).json({ message: e.message });
-  }
-};
+      res.status(201).json(data);
+    } catch (error: any) {
+      next(error);
+    }
+  };
 
-//Eliminar
-export const deleteCategory = async (
-  req: Request<{ id: string }>,
-  res: Response
-) => {
-  try {
-    await service.deleteCategory(req.params.id);
-    res.json({ message: "Eliminado correctamente" });
-  } catch (e: any) {
-    res.status(400).json({ message: e.message });
-  }
-};
+  findAll = async (
+    _req: Request,
+    res: Response,
+    next: NextFunction
+  ) => {
+    try {
+      const data = await this.service.findAll();
+
+      res.status(200).json(data);
+    } catch (error: any) {
+      next(error);
+    }
+  };
+
+  findById = async (
+    req: Request<{ id: string }>,
+    res: Response,
+    next: NextFunction
+  ) => {
+    try {
+      const { id } = req.params;
+
+      const data = await this.service.findById(id);
+
+      res.status(200).json(data);
+    } catch (error: any) {
+      next(error);
+    }
+  };
+
+  update = async (
+    req: Request<{ id: string }>,
+    res: Response,
+    next: NextFunction
+  ) => {
+    try {
+      const { id } = req.params;
+
+      const data = await this.service.update(
+        id,
+        req.body
+      );
+
+      res.status(200).json(data);
+    } catch (error: any) {
+      next(error);
+    }
+  };
+
+  delete = async (
+    req: Request<{ id: string }>,
+    res: Response,
+    next: NextFunction
+  ) => {
+    try {
+      const { id } = req.params;
+
+      const data = await this.service.delete(id);
+
+      res.status(200).json(data);
+    } catch (error: any) {
+      next(error);
+    }
+  };
+}

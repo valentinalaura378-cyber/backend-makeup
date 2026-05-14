@@ -8,6 +8,9 @@ const router = Router();
 const projectsController = new ProjectsController();
 
 router.post("/", authMiddleware, validate(createProjectSchema), projectsController.create);
+
+router.get('/projects', projectsController.findAll);
+
 router.get("/", authMiddleware, projectsController.findAll);
 router.get("/all/:id", authMiddleware, projectsController.findByIdAll);
 router.get("/me", authMiddleware, projectsController.findByUser);

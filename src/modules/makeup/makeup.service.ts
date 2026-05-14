@@ -1,35 +1,40 @@
-import * as repo from "./makeup.repository";
+import { MakeupRepository } from "./makeup.repository";
 import { Makeup } from "./makeup.model";
 
-// Obtener todos
-export const getAllMakeup = async () => {
-  return await repo.findAll();
-};
+export class MakeupService {
+  private repository = new MakeupRepository();
 
-// Obtener uno
-export const getMakeupById = async (id: string) => {
-  const makeup = await repo.findById(id);
-  if (!makeup) throw new Error("Makeup no encontrado");
-  return makeup;
-};
+  async create(data: Makeup) {
+    const now = new Date();
 
-// Crear
-export const createMakeup = async (data: Makeup) => {
-  if (!data.name || !data.brand || !data.price) {
-    throw new Error("Campos obligatorios faltantes");
+    const makeup = {
+      ...data,
+      isActive: true,
+      createdAt: now,
+      updatedAt: now,
+    };
+
+    return await this.repository.create(makeup);
   }
-  return await repo.create(data);
-};
 
-// Actualizar
-export const updateMakeup = async (id: string, data: Partial<Makeup>) => {
-  return await repo.update(id, data);
-};
+  async findAll() {
+    return await this.repository.findAll();
+  }
 
-// Eliminar
-export const deleteMakeup = async (id: string) => {
-  const makeup = await repo.findById(id);
-  if (!makeup) throw new Error("Makeup no encontrado");
+  async findById(id: string) {
+    const makeup = await this.repository.findById(id);
 
-  await repo.remove(id);
-};
+    if (!makeup)
+      throw new Error("Makeup no encontrado");
+
+    return makeup;
+  }
+
+  async update(id: string, data: Partial<Makeup>) {
+    return await this.repository.update(id, data);
+  }
+
+  async delete(id: string) {
+    return await this.repository.delete(id);
+  }
+}

@@ -1,55 +1,88 @@
-import { Request, Response } from "express";
-import * as service from "./makeup.service";
+import {
+  Request,
+  Response,
+  NextFunction,
+} from "express";
 
-// 📥 Obtener todos
-export const getAllMakeup = async (_req: Request, res: Response) => {
-  try {
-    const data = await service.getAllMakeup();
-    res.json(data);
-  } catch (error: any) {
-    res.status(500).json({ message: error.message });
-  }
-};
+import { MakeupService } from "./makeup.service";
 
-// 📥 Obtener uno
-export const getMakeupById = async (req: Request, res: Response) => {
-  try {
-    const { id } = req.params as { id: string };
-    const data = await service.getMakeupById(id);
-    res.json(data);
-  } catch (error: any) {
-    res.status(404).json({ message: error.message });
-  }
-};
+export class MakeupController {
+  private service = new MakeupService();
 
-// ➕ Crear
-export const createMakeup = async (req: Request, res: Response) => {
-  try {
-    const result = await service.createMakeup(req.body);
-    res.status(201).json(result);
-  } catch (error: any) {
-    res.status(400).json({ message: error.message });
-  }
-};
+  create = async (
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ) => {
+    try {
+      const data = await this.service.create(req.body);
 
-// ✏️ Actualizar
-export const updateMakeup = async (req: Request, res: Response) => {
-  try {
-    const { id } = req.params as { id: string };
-    const result = await service.updateMakeup(id, req.body);
-    res.json({ message: "Actualizado correctamente", result });
-  } catch (error: any) {
-    res.status(400).json({ message: error.message });
-  }
-};
+      res.status(201).json(data);
+    } catch (error: any) {
+      next(error);
+    }
+  };
 
-// ❌ Eliminar
-export const deleteMakeup = async (req: Request, res: Response) => {
-  try {
-    const { id } = req.params as { id: string };
-    await service.deleteMakeup(id);
-    res.json({ message: "Eliminado correctamente" });
-  } catch (error: any) {
-    res.status(400).json({ message: error.message });
-  }
-};
+  findAll = async (
+    _req: Request,
+    res: Response,
+    next: NextFunction
+  ) => {
+    try {
+      const data = await this.service.findAll();
+
+      res.status(200).json(data);
+    } catch (error: any) {
+      next(error);
+    }
+  };
+
+  findById = async (
+    req: Request<{ id: string }>,
+    res: Response,
+    next: NextFunction
+  ) => {
+    try {
+      const data = await this.service.findById(
+        req.params.id
+      );
+
+      res.status(200).json(data);
+    } catch (error: any) {
+      next(error);
+    }
+  };
+
+  update = async (
+    req: Request<{ id: string }>,
+    res: Response,
+    next: NextFunction
+  ) => {
+    try {
+      const data = await this.service.update(
+        req.params.id,
+        req.body
+      );
+
+      res.status(200).json(data);
+    } catch (error: any) {
+      next(error);
+    }
+  };
+
+  delete = async (
+    req: Request<{ id: string }>,
+    res: Response,
+    next: NextFunction
+  ) => {
+    try {
+      const data = await this.service.delete(
+        req.params.id
+      );
+
+      res.status(200).json(data);
+    } catch (error: any) {
+      next(error);
+    }
+  };
+}

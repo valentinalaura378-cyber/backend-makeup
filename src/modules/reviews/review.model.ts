@@ -2,10 +2,10 @@ import { ObjectId } from "mongodb";
 
 export interface Review {
   _id?: ObjectId;
-  productId: string;
-  userId?: string;
-  rating: number;
+  user: string;
   comment: string;
-  createdAt?: Date;
-  updatedAt?: Date;
+  rating: number;
+  isActive: boolean;
+  createdAt: Date;
+  updatedAt: Date;
 }

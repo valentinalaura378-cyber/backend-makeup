@@ -1,33 +1,40 @@
-import * as repo from "./brand.repository";
+import { BrandRepository } from "./brand.repository";
 import { Brand } from "./brand.model";
 
-// Obtener todos
-export const getAllBrands = async () => {
-  return await repo.findAll();
-};
+export class BrandService {
+  private repository = new BrandRepository();
 
-// Obtener uno
-export const getBrandById = async (id: string) => {
-  const brand = await repo.findById(id);
-  if (!brand) throw new Error("Brand no encontrada");
-  return brand;
-};
+  async create(data: Brand) {
+    const now = new Date();
 
-// Crear
-export const createBrand = async (data: Brand) => {
-  if (!data.name) throw new Error("Nombre obligatorio");
-  return await repo.create(data);
-};
+    const brand = {
+      ...data,
+      isActive: true,
+      createdAt: now,
+      updatedAt: now,
+    };
 
-// Actualizar
-export const updateBrand = async (id: string, data: Partial<Brand>) => {
-  return await repo.update(id, data);
-};
+    return await this.repository.create(brand);
+  }
 
-// Eliminar
-export const deleteBrand = async (id: string) => {
-  const brand = await repo.findById(id);
-  if (!brand) throw new Error("Brand no encontrada");
+  async findAll() {
+    return await this.repository.findAll();
+  }
 
-  await repo.remove(id);
-};
+  async findById(id: string) {
+    const brand = await this.repository.findById(id);
+
+    if (!brand)
+      throw new Error("Marca no encontrada");
+
+    return brand;
+  }
+
+  async update(id: string, data: Partial<Brand>) {
+    return await this.repository.update(id, data);
+  }
+
+  async delete(id: string) {
+    return await this.repository.delete(id);
+  }
+}

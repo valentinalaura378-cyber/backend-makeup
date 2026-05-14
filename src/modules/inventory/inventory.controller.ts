@@ -1,73 +1,88 @@
-import { Request, Response } from "express";
-import * as service from "./inventory.service";
+import {
+  Request,
+  Response,
+  NextFunction,
+} from "express";
 
-type ParamsId = {
-  id: string;
-};
+import { InventoryService } from "./inventory.service";
 
-//Obtener todos
-export const getAllInventory = async (_req: Request, res: Response) => {
-  try {
-    const data = await service.getAllInventory();
-    res.json(data);
-  } catch (error: any) {
-    res.status(500).json({ message: error.message });
-  }
-};
+export class InventoryController {
+  private service = new InventoryService();
 
-//Obtener uno
-export const getInventoryById = async (
-  req: Request<ParamsId>,
-  res: Response
-) => {
-  try {
-    const { id } = req.params;
+  create = async (
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ) => {
+    try {
+      const data = await this.service.create(req.body);
 
-    const data = await service.getInventoryById(id);
-    res.json(data);
-  } catch (error: any) {
-    res.status(404).json({ message: error.message });
-  }
-};
+      res.status(201).json(data);
+    } catch (error: any) {
+      next(error);
+    }
+  };
 
-//Crear
-export const createInventory = async (req: Request, res: Response) => {
-  try {
-    console.log("BODY:", req.body);
+  findAll = async (
+    _req: Request,
+    res: Response,
+    next: NextFunction
+  ) => {
+    try {
+      const data = await this.service.findAll();
 
-    const result = await service.createInventory(req.body);
-    res.status(201).json(result);
-  } catch (error: any) {
-    res.status(400).json({ message: error.message });
-  }
-};
+      res.status(200).json(data);
+    } catch (error: any) {
+      next(error);
+    }
+  };
 
-//Actualizar
-export const updateInventory = async (
-  req: Request<ParamsId>,
-  res: Response
-) => {
-  try {
-    const { id } = req.params;
+  findById = async (
+    req: Request<{ id: string }>,
+    res: Response,
+    next: NextFunction
+  ) => {
+    try {
+      const data = await this.service.findById(
+        req.params.id
+      );
 
-    const result = await service.updateInventory(id, req.body);
-    res.json({ message: "Actualizado correctamente", result });
-  } catch (error: any) {
-    res.status(400).json({ message: error.message });
-  }
-};
+      res.status(200).json(data);
+    } catch (error: any) {
+      next(error);
+    }
+  };
 
-//Eliminar
-export const deleteInventory = async (
-  req: Request<ParamsId>,
-  res: Response
-) => {
-  try {
-    const { id } = req.params;
+  update = async (
+    req: Request<{ id: string }>,
+    res: Response,
+    next: NextFunction
+  ) => {
+    try {
+      const data = await this.service.update(
+        req.params.id,
+        req.body
+      );
 
-    await service.deleteInventory(id);
-    res.json({ message: "Eliminado correctamente" });
-  } catch (error: any) {
-    res.status(400).json({ message: error.message });
-  }
-};
+      res.status(200).json(data);
+    } catch (error: any) {
+      next(error);
+    }
+  };
+
+  delete = async (
+    req: Request<{ id: string }>,
+    res: Response,
+    next: NextFunction
+  ) => {
+    try {
+      const data = await this.service.delete(
+        req.params.id
+      );
+
+      res.status(200).json(data);
+    } catch (error: any) {
+      next(error);
+    }
+  };
+}

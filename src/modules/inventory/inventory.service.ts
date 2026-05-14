@@ -1,63 +1,43 @@
-import * as repo from "./inventory.repository";
+import { InventoryRepository } from "./inventory.repository";
 import { Inventory } from "./inventory.model";
 
-// Obtener todos
-export const getAllInventory = async () => {
-  return await repo.findAll();
-};
+export class InventoryService {
+  private repository = new InventoryRepository();
 
-// Obtener uno
-export const getInventoryById = async (id: string) => {
-  const data = await repo.findById(id);
+  async create(data: Inventory) {
+    const now = new Date();
 
-  if (!data) {
-    throw new Error("Inventory no encontrado");
+    const inventory = {
+      ...data,
+      isActive: true,
+      createdAt: now,
+      updatedAt: now,
+    };
+
+    return await this.repository.create(inventory);
   }
 
-  return data;
-};
-
-// Crear
-export const createInventory = async (data: Inventory) => {
-  console.log("DATA EN SERVICE:", data);
-
-  const productId = data?.productId;
-  const quantity = Number(data?.quantity);
-  const location = data?.location;
-
-  if (!productId || !location || isNaN(quantity)) {
-    throw new Error("Campos obligatorios faltantes");
+  async findAll() {
+    return await this.repository.findAll();
   }
 
-  return await repo.create({
-    productId,
-    quantity,
-    location,
-    createdAt: new Date()
-  });
-};
+  async findById(id: string) {
+    const inventory = await this.repository.findById(id);
 
-// Actualizar
-export const updateInventory = async (id: string, data: Partial<Inventory>) => {
-  const existing = await repo.findById(id);
+    if (!inventory)
+      throw new Error("Inventario no encontrado");
 
-  if (!existing) {
-    throw new Error("Inventory no encontrado");
+    return inventory;
   }
 
-  return await repo.update(id, {
-    ...data,
-    updatedAt: new Date()
-  });
-};
-
-// Eliminar
-export const deleteInventory = async (id: string) => {
-  const existing = await repo.findById(id);
-
-  if (!existing) {
-    throw new Error("Inventory no encontrado");
+  async update(
+    id: string,
+    data: Partial<Inventory>
+  ) {
+    return await this.repository.update(id, data);
   }
 
-  await repo.remove(id);
-};
+  async delete(id: string) {
+    return await this.repository.delete(id);
+  }
+}

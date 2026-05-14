@@ -4,5 +4,7 @@ export interface Brand {
   _id?: ObjectId;
   name: string;
   country?: string;
-  createdAt?: Date;
+  isActive: boolean;
+  createdAt: Date;
+  updatedAt: Date;
 }

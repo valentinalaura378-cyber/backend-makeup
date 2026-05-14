@@ -2,34 +2,54 @@ import { ObjectId } from "mongodb";
 import { getDb } from "../../config/database";
 import { Makeup } from "./makeup.model";
 
-const collection = () => getDb().collection<Makeup>("makeup");
+export class MakeupRepository {
+  private collection() {
+    return getDb().collection<Makeup>("makeups");
+  }
 
-//Obtener todos
-export const findAll = async () => {
-  return await collection().find().toArray();
-};
+  async create(data: Makeup): Promise<Makeup> {
+    const result = await this.collection().insertOne(data);
 
-//Obtener por ID
-export const findById = async (id: string) => {
-  return await collection().findOne({ _id: new ObjectId(id) });
-};
+    return {
+      _id: result.insertedId,
+      ...data,
+    };
+  }
 
-//Crear
-export const create = async (data: Makeup) => {
-  data.createdAt = new Date();
-  const result = await collection().insertOne(data);
-  return { _id: result.insertedId, ...data };
-};
+  async findAll(): Promise<Makeup[]> {
+    return this.collection()
+      .find({ isActive: true })
+      .toArray();
+  }
 
-//Actualizar
-export const update = async (id: string, data: Partial<Makeup>) => {
-  return await collection().updateOne(
-    { _id: new ObjectId(id) },
-    { $set: data }
-  );
-};
+  async findById(id: string): Promise<Makeup | null> {
+    return this.collection().findOne({
+      _id: new ObjectId(id),
+      isActive: true,
+    });
+  }
 
-//Eliminar
-export const remove = async (id: string) => {
-  return await collection().deleteOne({ _id: new ObjectId(id) });
-};
+  async update(id: string, data: Partial<Makeup>) {
+    return this.collection().updateOne(
+      { _id: new ObjectId(id) },
+      {
+        $set: {
+          ...data,
+          updatedAt: new Date(),
+        },
+      }
+    );
+  }
+
+  async delete(id: string) {
+    return this.collection().updateOne(
+      { _id: new ObjectId(id) },
+      {
+        $set: {
+          isActive: false,
+          updatedAt: new Date(),
+        },
+      }
+    );
+  }
+}

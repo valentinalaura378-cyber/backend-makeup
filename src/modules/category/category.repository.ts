@@ -2,21 +2,57 @@ import { ObjectId } from "mongodb";
 import { getDb } from "../../config/database";
 import { Category } from "./category.model";
 
-const collection = () => getDb().collection<Category>("categories");
+export class CategoryRepository {
+  private collection() {
+    return getDb().collection<Category>("categories");
+  }
 
-export const findAll = async () => collection().find().toArray();
+  async create(data: Category): Promise<Category> {
+    const result = await this.collection().insertOne(data);
 
-export const findById = async (id: string) =>
-  collection().findOne({ _id: new ObjectId(id) });
+    return {
+      _id: result.insertedId,
+      ...data,
+    };
+  }
 
-export const create = async (data: Category) => {
-  data.createdAt = new Date();
-  const result = await collection().insertOne(data);
-  return { _id: result.insertedId, ...data };
-};
+  async findAll(): Promise<Category[]> {
+    return this.collection()
+      .find({ isActive: true })
+      .toArray();
+  }
 
-export const update = async (id: string, data: Partial<Category>) =>
-  collection().updateOne({ _id: new ObjectId(id) }, { $set: data });
+  async findById(id: string): Promise<Category | null> {
+    return this.collection().findOne({
+      _id: new ObjectId(id),
+      isActive: true,
+    });
+  }
 
-export const remove = async (id: string) =>
-  collection().deleteOne({ _id: new ObjectId(id) });
+  async update(
+    id: string,
+    data: Partial<Category>
+  ) {
+    return this.collection().updateOne(
+      { _id: new ObjectId(id) },
+      {
+        $set: {
+          ...data,
+          updatedAt: new Date(),
+        },
+      }
+    );
+  }
+
+  async delete(id: string) {
+    return this.collection().updateOne(
+      { _id: new ObjectId(id) },
+      {
+        $set: {
+          isActive: false,
+          updatedAt: new Date(),
+        },
+      }
+    );
+  }
+}
