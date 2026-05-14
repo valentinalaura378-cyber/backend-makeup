@@ -14,7 +14,12 @@ export const openApiSpec = swaggerJsdoc({
     servers: [
       {
         url: "http://localhost:3000/api/v1",
+        description: "Servidor local"
       },
+      {
+        url: "https://backend-makeup-6i49.onrender.com/api/v1",
+        description: "Servidor produccion"  
+      }
     ],
 
     components: {
