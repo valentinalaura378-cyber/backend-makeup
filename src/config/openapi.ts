@@ -17,7 +17,7 @@ export const openApiSpec = swaggerJsdoc({
         description: "Servidor local"
       },
       {
-        url: "https://backend-makeup-6i49.onrender.com/api/v1",
+        url: "https://backend-makeup.onrender.com/api/v1",
         description: "Servidor produccion"  
       }
     ],
@@ -39,5 +39,5 @@ export const openApiSpec = swaggerJsdoc({
     ],
   },
 
-  apis: [path.join(__dirname, "../modules/**/*.routes.ts")],
+  apis: [path.join(__dirname, "../modules/**/*.routes.{ts,js}")],
 });
